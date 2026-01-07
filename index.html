@@ -89,6 +89,11 @@
         .light-red { background-color: #ef4444; box-shadow: 0 0 8px rgba(239, 68, 68, 0.4); }
         .light-gray { background-color: #cbd5e1; }
 
+        /* Progress Bar Segment Colors */
+        .prog-green { background-color: #22c55e; }
+        .prog-orange { background-color: #f97316; }
+        .prog-gray { background-color: #e2e8f0; }
+
     </style>
 </head>
 <body class="flex h-screen bg-slate-50 text-slate-900">
@@ -354,15 +359,18 @@
         <!-- Module: ASM Core Project -->
         <div id="module-core" class="flex-1 overflow-y-auto custom-scrollbar p-8 hidden relative z-0">
             <div class="max-w-7xl mx-auto space-y-8">
-                <!-- Header Info -->
+                <!-- Header Info & Filter -->
                 <div class="flex items-center justify-between">
                     <div>
                         <h2 class="text-2xl font-bold text-slate-800">Core Projects</h2>
                         <p class="text-slate-500 text-sm mt-1">High-priority strategic projects for ASM</p>
                     </div>
-                    <div class="flex items-center gap-2 text-sm text-slate-500 bg-white px-4 py-2 rounded-xl border border-slate-200 shadow-sm">
-                        <i data-lucide="info" class="w-4 h-4 text-brand-500"></i>
-                        <span>Updates Weekly</span>
+                    
+                    <!-- Core Filter -->
+                    <div class="flex bg-slate-100 p-1 rounded-xl border border-slate-200" id="core-filter-container">
+                        <button onclick="setCoreFilter('Active')" id="btn-core-active" class="px-4 py-2 rounded-lg text-xs font-bold transition-all bg-white shadow-sm text-brand-600 border border-slate-200">Active (On Track & Delayed)</button>
+                        <button onclick="setCoreFilter('Completed')" id="btn-core-completed" class="px-4 py-2 rounded-lg text-xs font-bold transition-all text-slate-500 hover:text-slate-800 hover:bg-white/50">Completed</button>
+                        <button onclick="setCoreFilter('All')" id="btn-core-all" class="px-4 py-2 rounded-lg text-xs font-bold transition-all text-slate-500 hover:text-slate-800 hover:bg-white/50">All</button>
                     </div>
                 </div>
 
@@ -397,6 +405,7 @@
         let chartInstance;
         let activeMode = 'ASM'; 
         let currentStatusFilter = 'ALL'; 
+        let coreProjectFilter = 'Active'; // Default filter for Core Projects
 
         // Utils
         const toMillion = (val) => val / 1000000;
@@ -685,18 +694,54 @@
             return 'light-gray';
         }
 
+        // Determine color segment for progress bar
+        function getProgressSegmentColor(plan, close) {
+            if (!plan) return 'prog-gray';
+            const planDate = new Date(plan);
+            const closeDate = close ? new Date(close) : null;
+            
+            // If closed
+            if (closeDate) {
+                return (closeDate <= planDate) ? 'prog-green' : 'prog-orange';
+            }
+            return 'prog-gray';
+        }
+
+        function setCoreFilter(filter) {
+            coreProjectFilter = filter;
+            renderCoreProjects();
+        }
+
+        function updateCoreFilterButtons() {
+            ['Active', 'Completed', 'All'].forEach(f => {
+                const btn = document.getElementById(`btn-core-${f.toLowerCase()}`);
+                if (coreProjectFilter === f) {
+                    btn.className = "px-4 py-2 rounded-lg text-xs font-bold transition-all bg-white shadow-sm text-brand-600 border border-slate-200";
+                } else {
+                    btn.className = "px-4 py-2 rounded-lg text-xs font-bold transition-all text-slate-500 hover:text-slate-800 hover:bg-white/50";
+                }
+            });
+        }
+
         function renderCoreProjects() {
+            updateCoreFilterButtons();
             const grid = document.getElementById('core-project-grid');
             grid.innerHTML = '';
 
-            coreData.forEach(p => {
+            // Filter logic
+            const filteredCore = coreData.filter(p => {
+                if (coreProjectFilter === 'All') return true;
+                if (coreProjectFilter === 'Completed') return p.status === 'Completed';
+                // Active = On Track, Delayed, Critical
+                return p.status !== 'Completed';
+            });
+
+            filteredCore.forEach(p => {
                 // Determine Border Style (Status Based)
                 let borderClass = 'border-l-4 border-l-gray-300'; // Default
                 let statusBg = 'bg-gray-100 text-gray-600';
 
                 // Map 'Status' to Border Colors per request:
-                // Faster/On Track -> Green Border
-                // Slower/Delayed -> Orange Border
                 if (p.status === 'On Track' || p.status === 'Completed') {
                     borderClass = 'border-fast'; // Green
                     statusBg = 'bg-ontrack';
@@ -710,6 +755,11 @@
                 const tl_p1 = getTrafficLight(p.phase_1_plan, p.phase_1_close);
                 const tl_jdp = getTrafficLight(p.JDP_plan, p.JDP_close);
 
+                // Progress Bar Segments
+                const pb_p0 = getProgressSegmentColor(p.phase_0_plan, p.phase_0_close);
+                const pb_p1 = getProgressSegmentColor(p.phase_1_plan, p.phase_1_close);
+                const pb_jdp = getProgressSegmentColor(p.JDP_plan, p.JDP_close);
+
                 // Safe check for null dates
                 const p0Plan = p.phase_0_plan || '-';
                 const p0Close = p.phase_0_close || '-';
@@ -717,6 +767,9 @@
                 const p1Close = p.phase_1_close || '-';
                 const jdpPlan = p.JDP_plan || '-';
                 const jdpClose = p.JDP_close || '-';
+
+                // Start Date Display (Use Phase 0 Plan as proxy start or just label it)
+                const startDateDisplay = p0Plan !== '-' ? p0Plan : 'TBD';
 
                 const card = document.createElement('div');
                 card.className = `white-card p-0 rounded-2xl shadow-sm hover:shadow-md transition-all flex flex-col overflow-hidden ${borderClass}`;
@@ -783,15 +836,24 @@
                                 </div>
                             </div>
                         </div>
+
+                        <!-- Horizontal Progress Bar -->
+                        <div class="mt-4 pt-4 border-t border-slate-50">
+                            <div class="flex h-2 w-full rounded-full overflow-hidden bg-slate-100">
+                                <div class="flex-1 ${pb_p0} border-r border-white"></div>
+                                <div class="flex-1 ${pb_p1} border-r border-white"></div>
+                                <div class="flex-1 ${pb_jdp}"></div>
+                            </div>
+                            <div class="flex justify-between mt-1 text-[10px] text-slate-400 font-medium">
+                                <span>Start: ${startDateDisplay}</span>
+                                <span>Target: ${p.target}</span>
+                            </div>
+                        </div>
                     </div>
 
                     <!-- Footer Info -->
                     <div class="bg-slate-50 p-4 border-t border-slate-100 text-xs">
-                        <div class="flex justify-between items-center mb-2">
-                            <span class="font-bold text-slate-400 uppercase text-[10px]">Target Date</span>
-                            <span class="font-bold text-slate-800 bg-white px-2 py-1 rounded border border-slate-200 shadow-sm">${p.target}</span>
-                        </div>
-                        ${p.note ? `<div class="mt-2 text-slate-500 italic bg-white p-2 rounded border border-slate-200 text-[11px]"><span class="font-bold text-amber-500 not-italic mr-1">Note:</span>${p.note}</div>` : ''}
+                        ${p.note ? `<div class="text-slate-500 italic bg-white p-2 rounded border border-slate-200 text-[11px]"><span class="font-bold text-amber-500 not-italic mr-1">Note:</span>${p.note}</div>` : '<div class="text-slate-300 italic text-[11px] text-center">No additional notes</div>'}
                     </div>
                 `;
                 grid.appendChild(card);
