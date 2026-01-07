@@ -1,0 +1,812 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sales Team 1 SaaS (White)</title>
+    
+    <!-- Favicon -->
+    <link rel="icon" type="image/png" href="img/logo_company_transparency.png">
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Noto+Sans+KR:wght@300;400;500;700&display=swap" rel="stylesheet">
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: { sans: ['Inter', '"Noto Sans KR"', 'sans-serif'] },
+                    colors: {
+                        brand: {
+                            50: '#f0f9ff', 100: '#e0f2fe', 500: '#0ea5e9', 600: '#0284c7', 700: '#0369a1', 900: '#0c4a6e',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        body { background-color: #f8fafc; color: #1e293b; overflow: hidden; }
+        
+        /* White Glass/Card Effect */
+        .white-card { 
+            background: #ffffff; 
+            border: 1px solid #e2e8f0; 
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
+        }
+        
+        .sidebar { transition: width 0.3s ease; border-right: 1px solid #e2e8f0; background: #ffffff; }
+        .nav-item { transition: all 0.2s; cursor: pointer; color: #64748b; }
+        .nav-item:hover { background-color: #f1f5f9; color: #0f172a; }
+        .nav-item.active { 
+            background-color: #f0f9ff; 
+            color: #0284c7; 
+            border-right: 3px solid #0284c7; 
+        }
+        
+        .custom-scrollbar::-webkit-scrollbar { width: 5px; }
+        .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+
+        .progress-badge { font-size: 10px; font-weight: 800; padding: 2px 8px; border-radius: 9999px; text-transform: uppercase; }
+        .status-open { background-color: #f0f9ff; color: #0284c7; border: 1px solid #e0f2fe; }
+        .status-finished { background-color: #f0fdf4; color: #16a34a; border: 1px solid #dcfce7; }
+        .status-close { background-color: #f8fafc; color: #64748b; border: 1px solid #e2e8f0; }
+
+        select, input {
+            background-color: #ffffff !important;
+            border: 1px solid #e2e8f0 !important;
+            color: #0f172a !important;
+        }
+        select:focus, input:focus {
+            border-color: #0ea5e9 !important;
+            outline: none;
+            box-shadow: 0 0 0 2px rgba(14, 165, 233, 0.1);
+        }
+
+        .stat-card-hover:hover {
+            border-color: #0ea5e9;
+            transform: translateY(-2px);
+            box-shadow: 0 10px 30px -10px rgba(14, 165, 233, 0.15);
+        }
+
+        /* Core Project Card Border Styles (Updated Logic) */
+        .border-fast { border: 2px solid #22c55e !important; } /* Green for On Track/Fast */
+        .border-slow { border: 2px solid #f97316 !important; } /* Orange for Delayed/Slow */
+        
+        /* Traffic Light Colors */
+        .light-green { background-color: #22c55e; box-shadow: 0 0 8px rgba(34, 197, 94, 0.4); }
+        .light-red { background-color: #ef4444; box-shadow: 0 0 8px rgba(239, 68, 68, 0.4); }
+        .light-gray { background-color: #cbd5e1; }
+
+    </style>
+</head>
+<body class="flex h-screen bg-slate-50 text-slate-900">
+
+    <!-- Sidebar -->
+    <aside class="sidebar w-64 flex flex-col z-20">
+        <div class="p-6 flex items-center gap-3">
+            <div class="bg-brand-600 p-2 rounded-xl text-white shadow-lg shadow-brand-200">
+                <i data-lucide="bar-chart-3" class="w-6 h-6"></i>
+            </div>
+            <div>
+                <h1 class="font-bold text-lg text-slate-900 leading-tight">ASENDIA</h1>
+                <p class="text-[10px] text-slate-500 font-bold uppercase tracking-tighter">Sales Team 1 Platform</p>
+            </div>
+        </div>
+
+        <nav class="flex-1 px-3 space-y-1 overflow-y-auto custom-scrollbar">
+            <p class="px-3 py-4 text-[11px] font-bold text-slate-400 uppercase tracking-widest">Main Modules</p>
+            
+            <a onclick="switchModule('sales')" id="nav-sales" class="nav-item active flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium">
+                <i data-lucide="trending-up" class="w-5 h-5"></i>
+                <span>Sales Performance</span>
+            </a>
+            <a onclick="switchModule('project')" id="nav-project" class="nav-item flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium">
+                <i data-lucide="box" class="w-5 h-5"></i>
+                <span>ASM Project Mgmt</span>
+            </a>
+            <a onclick="switchModule('core')" id="nav-core" class="nav-item flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium">
+                <i data-lucide="star" class="w-5 h-5"></i>
+                <span>ASM Core Project</span>
+            </a>
+            <a class="nav-item flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium opacity-50 cursor-not-allowed">
+                <i data-lucide="users" class="w-5 h-5"></i>
+                <span>ASM Customer Mgmt</span>
+                <span class="ml-auto text-[10px] bg-slate-100 border border-slate-200 px-1.5 py-0.5 rounded text-slate-400">Soon</span>
+            </a>
+
+            <p class="px-3 py-6 text-[11px] font-bold text-slate-400 uppercase tracking-widest">Settings</p>
+            <a href="#" class="nav-item flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium">
+                <i data-lucide="settings" class="w-5 h-5"></i>
+                <span>System Settings</span>
+            </a>
+        </nav>
+
+        <div class="p-4 bg-slate-50 m-4 rounded-xl border border-slate-200">
+            <div class="flex items-center gap-3 mb-2">
+                <img src="img/logo_company_transparency.png" alt="Company Logo" class="w-8 h-8 object-contain">
+                <div>
+                    <p class="text-xs font-bold text-slate-700">Sales Team 1</p>
+                    <p class="text-[10px] text-slate-500">Administrator</p>
+                </div>
+            </div>
+        </div>
+    </aside>
+
+    <!-- Main Content Area -->
+    <div class="flex-1 flex flex-col overflow-hidden relative">
+        <!-- Header -->
+        <header class="h-16 bg-white border-b border-slate-200 flex items-center justify-between px-8 shrink-0 z-10">
+            <h2 id="header-title" class="font-bold text-slate-800 flex items-center gap-2">
+                <i data-lucide="pie-chart" class="w-5 h-5 text-brand-600"></i>
+                Integrated Sales Dashboard
+            </h2>
+            <div id="header-actions" class="flex items-center gap-4">
+                <div class="bg-slate-100 rounded-lg p-1 flex border border-slate-200">
+                    <button id="mode-asm" class="px-4 py-1.5 text-xs font-bold rounded-md bg-white shadow-sm text-brand-600 border border-slate-100 transition-all">ASM Dedicated</button>
+                    <button id="mode-all" class="px-4 py-1.5 text-xs font-bold rounded-md text-slate-500 hover:text-slate-800 transition-all">ASENDIA Total</button>
+                </div>
+            </div>
+        </header>
+
+        <!-- Module: Sales Dashboard -->
+        <div id="module-sales" class="flex-1 overflow-y-auto custom-scrollbar p-8 block relative z-0">
+            <div class="max-w-7xl mx-auto space-y-8">
+                <!-- Summary Stats (White) -->
+                <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
+                    <!-- Total -->
+                    <div class="white-card p-5 rounded-2xl relative overflow-hidden transition-all duration-300 stat-card-hover group">
+                        <div class="flex justify-between items-start z-10 relative">
+                            <div>
+                                <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">2025 Total (ASM)</p>
+                                <h3 id="stat-2025-total" class="text-2xl font-bold text-slate-900 tracking-tight">₩0 M</h3>
+                            </div>
+                            <div class="p-2.5 bg-slate-50 rounded-xl text-slate-400 group-hover:bg-brand-500 group-hover:text-white transition-colors border border-slate-100">
+                                <i data-lucide="history" class="w-5 h-5"></i>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- Target -->
+                    <div class="white-card p-5 rounded-2xl relative overflow-hidden transition-all duration-300 stat-card-hover group border-l-4 border-l-brand-500">
+                        <div class="flex justify-between items-start z-10 relative">
+                            <div>
+                                <p class="text-[10px] font-bold text-brand-600 uppercase tracking-widest mb-1">2026 Target (ASM)</p>
+                                <h3 id="stat-2026-target" class="text-2xl font-bold text-slate-900 tracking-tight">₩0 M</h3>
+                            </div>
+                            <div class="p-2.5 bg-brand-50 rounded-xl text-brand-500 group-hover:bg-brand-500 group-hover:text-white transition-colors border border-brand-100">
+                                <i data-lucide="target" class="w-5 h-5"></i>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- Actual -->
+                    <div class="white-card p-5 rounded-2xl relative overflow-hidden transition-all duration-300 stat-card-hover group">
+                        <div class="flex justify-between items-start z-10 relative">
+                            <div>
+                                <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">2026 Actual</p>
+                                <h3 id="stat-2026-actual" class="text-2xl font-bold text-slate-900 tracking-tight">₩0 M</h3>
+                            </div>
+                            <div class="p-2.5 bg-emerald-50 rounded-xl text-emerald-500 group-hover:bg-emerald-500 group-hover:text-white transition-colors border border-emerald-100">
+                                <i data-lucide="activity" class="w-5 h-5"></i>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- Share -->
+                    <div class="white-card p-5 rounded-2xl relative overflow-hidden transition-all duration-300 stat-card-hover group bg-gradient-to-br from-brand-600 to-brand-700 border-none text-white">
+                        <div class="flex justify-between items-start z-10 relative">
+                            <div>
+                                <p class="text-[10px] font-bold text-brand-100 uppercase tracking-widest mb-1">ASM Share</p>
+                                <h3 id="stat-share-percent" class="text-2xl font-bold text-white tracking-tight">0.0%</h3>
+                            </div>
+                            <div class="p-2.5 bg-white/20 rounded-xl text-white group-hover:bg-white group-hover:text-brand-600 transition-colors">
+                                <i data-lucide="pie-chart" class="w-5 h-5"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                    <div class="lg:col-span-2 white-card rounded-2xl p-8 h-[450px]">
+                        <canvas id="salesChart"></canvas>
+                    </div>
+                    <div class="white-card rounded-2xl p-8 flex flex-col h-[450px]">
+                        <h3 class="font-bold text-slate-800 mb-4 flex items-center gap-2">
+                            <i data-lucide="edit-3" class="w-4 h-4 text-brand-600"></i>
+                            2026 Update
+                        </h3>
+                        <div id="monthly-update-container" class="flex-1 overflow-y-auto pr-2 space-y-3 custom-scrollbar"></div>
+                        <button onclick="saveMonthlyData()" class="mt-4 w-full bg-brand-600 hover:bg-brand-700 text-white font-bold py-3 rounded-xl shadow-lg shadow-brand-200 transition-all flex items-center justify-center gap-2">
+                            <i data-lucide="save" class="w-4 h-4"></i> Save Data
+                        </button>
+                    </div>
+                </div>
+
+                <div class="white-card rounded-2xl overflow-hidden">
+                    <div class="p-6 border-b border-slate-100 flex justify-between items-center">
+                        <h3 class="font-bold text-slate-800">2025 Detail Records</h3>
+                        <select id="table-filter-customer" class="text-xs rounded-lg px-4 py-2 font-semibold cursor-pointer">
+                            <option value="ASM">ASM Only</option>
+                            <option value="ALL">Total Company</option>
+                        </select>
+                    </div>
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left text-xs">
+                            <thead class="bg-slate-50 text-slate-500 font-bold uppercase tracking-widest border-b border-slate-200">
+                                <tr>
+                                    <th class="px-6 py-4">Biz Type</th>
+                                    <th class="px-6 py-4">Type</th>
+                                    <th class="px-4 py-4">Jan</th><th class="px-4 py-4">Feb</th><th class="px-4 py-4">Mar</th>
+                                    <th class="px-4 py-4">Apr</th><th class="px-4 py-4">May</th><th class="px-4 py-4">Jun</th>
+                                    <th class="px-4 py-4">Jul</th><th class="px-4 py-4">Aug</th><th class="px-4 py-4">Sep</th>
+                                    <th class="px-4 py-4">Oct</th><th class="px-4 py-4">Nov</th><th class="px-4 py-4">Dec</th>
+                                </tr>
+                            </thead>
+                            <tbody id="sales-table-body" class="divide-y divide-slate-100 text-slate-600"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Module: ASM Project Management -->
+        <div id="module-project" class="flex-1 overflow-y-auto custom-scrollbar p-8 hidden relative z-0">
+            <div class="max-w-7xl mx-auto space-y-6">
+                <!-- Project Stats -->
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <div class="white-card p-5 rounded-2xl relative overflow-hidden transition-all duration-300 stat-card-hover group border-l-4 border-l-blue-500">
+                        <div class="flex justify-between items-start z-10 relative">
+                            <div>
+                                <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Total Projects</p>
+                                <h3 id="pstat-total" class="text-2xl font-bold text-slate-900 tracking-tight">0</h3>
+                            </div>
+                            <div class="p-2.5 bg-blue-50 text-blue-500 rounded-xl group-hover:bg-blue-500 group-hover:text-white transition-colors">
+                                <i data-lucide="layers" class="w-5 h-5"></i>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="white-card p-5 rounded-2xl relative overflow-hidden transition-all duration-300 stat-card-hover group border-l-4 border-l-amber-500">
+                        <div class="flex justify-between items-start z-10 relative">
+                            <div>
+                                <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Open Projects</p>
+                                <h3 id="pstat-open" class="text-2xl font-bold text-slate-900 tracking-tight">0</h3>
+                            </div>
+                            <div class="p-2.5 bg-amber-50 text-amber-500 rounded-xl group-hover:bg-amber-500 group-hover:text-white transition-colors">
+                                <i data-lucide="clock" class="w-5 h-5"></i>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="white-card p-5 rounded-2xl relative overflow-hidden transition-all duration-300 stat-card-hover group border-l-4 border-l-emerald-500">
+                        <div class="flex justify-between items-start z-10 relative">
+                            <div>
+                                <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Done/Closed</p>
+                                <h3 id="pstat-done" class="text-2xl font-bold text-slate-900 tracking-tight">0</h3>
+                            </div>
+                            <div class="p-2.5 bg-emerald-50 text-emerald-500 rounded-xl group-hover:bg-emerald-500 group-hover:text-white transition-colors">
+                                <i data-lucide="check-check" class="w-5 h-5"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Filters Area -->
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4 white-card p-4 rounded-2xl shadow-sm">
+                    <div class="space-y-1.5">
+                        <label class="text-[10px] font-bold text-slate-400 uppercase ml-1">Department</label>
+                        <select id="filterDept" class="w-full rounded-xl px-4 py-3 text-sm font-semibold cursor-pointer">
+                            <option value="ALL">All Departments</option>
+                            <option value="R&D">R&D</option>
+                            <option value="MFG">MFG</option>
+                        </select>
+                    </div>
+                    <div class="space-y-1.5">
+                        <label class="text-[10px] font-bold text-slate-400 uppercase ml-1">Category</label>
+                        <select id="filterCategory" class="w-full rounded-xl px-4 py-3 text-sm font-semibold cursor-pointer">
+                            <option value="ALL">All Categories</option>
+                            <option value="RFG">RFG</option>
+                            <option value="RFM">RFM</option>
+                            <option value="CONTROLLER">Controller</option>
+                            <option value="Etc">Etc</option>
+                        </select>
+                    </div>
+                    <div class="space-y-1.5">
+                        <label class="text-[10px] font-bold text-slate-400 uppercase ml-1">Status</label>
+                        <div class="flex bg-slate-100 p-1 rounded-xl h-[46px] border border-slate-200" id="status-btn-container">
+                            <button onclick="setStatusFilter('OPEN')" id="btn-status-OPEN" class="flex-1 rounded-lg text-xs font-bold transition-all text-slate-400 hover:text-slate-800 hover:bg-white">OPEN</button>
+                            <button onclick="setStatusFilter('FINISHED')" id="btn-status-FINISHED" class="flex-1 rounded-lg text-xs font-bold transition-all text-slate-400 hover:text-slate-800 hover:bg-white">FINISHED</button>
+                            <button onclick="setStatusFilter('CLOSE')" id="btn-status-CLOSE" class="flex-1 rounded-lg text-xs font-bold transition-all text-slate-400 hover:text-slate-800 hover:bg-white">CLOSE</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Project Table -->
+                <div class="white-card rounded-2xl overflow-hidden">
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left text-xs">
+                            <thead class="bg-slate-50 text-slate-500 font-bold uppercase tracking-widest border-b border-slate-200">
+                                <tr>
+                                    <th class="px-6 py-4">Pri.</th>
+                                    <th class="px-6 py-4">Customer/Requestor</th>
+                                    <th class="px-6 py-4">Category</th>
+                                    <th class="px-6 py-4">Model / PN</th>
+                                    <th class="px-6 py-4">Qty</th>
+                                    <th class="px-6 py-4">Spec / App</th>
+                                    <th class="px-6 py-4">Dept / NBD</th>
+                                    <th class="px-6 py-4">Status</th>
+                                </tr>
+                            </thead>
+                            <tbody id="project-table-body" class="divide-y divide-slate-100 text-slate-600"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Module: ASM Core Project -->
+        <div id="module-core" class="flex-1 overflow-y-auto custom-scrollbar p-8 hidden relative z-0">
+            <div class="max-w-7xl mx-auto space-y-8">
+                <!-- Header Info -->
+                <div class="flex items-center justify-between">
+                    <div>
+                        <h2 class="text-2xl font-bold text-slate-800">Core Projects</h2>
+                        <p class="text-slate-500 text-sm mt-1">High-priority strategic projects for ASM</p>
+                    </div>
+                    <div class="flex items-center gap-2 text-sm text-slate-500 bg-white px-4 py-2 rounded-xl border border-slate-200 shadow-sm">
+                        <i data-lucide="info" class="w-4 h-4 text-brand-500"></i>
+                        <span>Updates Weekly</span>
+                    </div>
+                </div>
+
+                <!-- Core Project Cards Grid -->
+                <div id="core-project-grid" class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <!-- Cards will be injected via JS -->
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Toast -->
+    <div id="toast" class="fixed bottom-10 left-1/2 -translate-x-1/2 bg-brand-600 text-white px-8 py-4 rounded-2xl shadow-2xl shadow-brand-200 transform translate-y-32 opacity-0 transition-all duration-300 flex items-center gap-3 z-50">
+        <i data-lucide="check-circle" class="text-white w-5 h-5"></i>
+        <span id="toast-message" class="font-bold text-sm">Successfully processed.</span>
+    </div>
+
+    <!-- Data Imports -->
+    <script src="./2025_sales_data.js"></script>
+    <script src="./2026_sales_target_data.js"></script>
+    <script src="./project_asm.js"></script>
+    <script src="./core_project_data.js"></script>
+
+    <script>
+        // Global Data
+        const data25 = window.salesData2025 || [];
+        const data26 = window.salesData2026 || { asm: { target: [], actual: [] }, total: { target: [], actual: [] } };
+        const pData = window.projectAsmData || [];
+        const coreData = window.coreProjectData || [];
+
+        let chartInstance;
+        let activeMode = 'ASM'; 
+        let currentStatusFilter = 'ALL'; 
+
+        // Utils
+        const toMillion = (val) => val / 1000000;
+        const fmtM = (val) => new Intl.NumberFormat('en-US').format(Math.round(toMillion(val))) + "M";
+
+        // Chart.js Default Config for Light Mode
+        Chart.defaults.color = '#64748b';
+        Chart.defaults.borderColor = '#e2e8f0';
+
+        function init() {
+            lucide.createIcons();
+            renderSalesDashboard();
+            renderProjectDashboard();
+            renderCoreProjects();
+            
+            // Listeners
+            document.getElementById('mode-asm').addEventListener('click', () => switchMode('ASM'));
+            document.getElementById('mode-all').addEventListener('click', () => switchMode('ALL'));
+            document.getElementById('table-filter-customer').addEventListener('change', (e) => renderTable(e.target.value));
+            
+            document.getElementById('filterDept').addEventListener('change', renderProjectDashboard);
+            document.getElementById('filterCategory').addEventListener('change', renderProjectDashboard);
+        }
+
+        function switchModule(module) {
+            document.getElementById('module-sales').classList.add('hidden');
+            document.getElementById('module-project').classList.add('hidden');
+            document.getElementById('module-core').classList.add('hidden');
+            
+            document.getElementById('nav-sales').classList.remove('active');
+            document.getElementById('nav-project').classList.remove('active');
+            document.getElementById('nav-core').classList.remove('active');
+            
+            document.getElementById('header-actions').classList.add('hidden');
+
+            if (module === 'sales') {
+                document.getElementById('module-sales').classList.remove('hidden');
+                document.getElementById('nav-sales').classList.add('active');
+                document.getElementById('header-title').innerHTML = '<i data-lucide="pie-chart" class="w-5 h-5 text-brand-600"></i> Integrated Sales Dashboard';
+                document.getElementById('header-actions').classList.remove('hidden');
+                renderSalesDashboard();
+            } else if (module === 'project') {
+                document.getElementById('module-project').classList.remove('hidden');
+                document.getElementById('nav-project').classList.add('active');
+                document.getElementById('header-title').innerHTML = '<i data-lucide="box" class="w-5 h-5 text-brand-600"></i> ASM Project Management';
+                renderProjectDashboard();
+            } else if (module === 'core') {
+                document.getElementById('module-core').classList.remove('hidden');
+                document.getElementById('nav-core').classList.add('active');
+                document.getElementById('header-title').innerHTML = '<i data-lucide="star" class="w-5 h-5 text-brand-600"></i> ASM Core Project';
+                renderCoreProjects();
+            }
+            lucide.createIcons();
+        }
+
+        function switchMode(mode) {
+            activeMode = mode;
+            const bAsm = document.getElementById('mode-asm');
+            const bAll = document.getElementById('mode-all');
+            
+            if(mode === 'ASM') {
+                bAsm.className = "px-4 py-1.5 text-xs font-bold rounded-md bg-white shadow-sm text-brand-600 border border-slate-100 transition-all";
+                bAll.className = "px-4 py-1.5 text-xs font-bold rounded-md text-slate-500 hover:text-slate-800 transition-all";
+            } else {
+                bAll.className = "px-4 py-1.5 text-xs font-bold rounded-md bg-white shadow-sm text-brand-600 border border-slate-100 transition-all";
+                bAsm.className = "px-4 py-1.5 text-xs font-bold rounded-md text-slate-500 hover:text-slate-800 transition-all";
+            }
+            renderSalesDashboard();
+        }
+
+        // --- Sales Logic ---
+        function renderSalesDashboard() {
+            renderSummary();
+            renderUpdateForm();
+            renderChart();
+            renderTable(document.getElementById('table-filter-customer').value);
+        }
+
+        function renderSummary() {
+            const asm25 = data25.filter(d => d.customer === 'ASM');
+            const total25 = asm25.reduce((sum, row) => sum + row.monthly.reduce((a, b) => a + b, 0), 0);
+            document.getElementById('stat-2025-total').textContent = `₩ ${fmtM(total25)}`;
+
+            const targetVal = activeMode === 'ASM' ? data26.asm.target : data26.total.target;
+            const actualVal = activeMode === 'ASM' ? data26.asm.actual : data26.total.actual;
+            const sumTarget = targetVal.reduce((a,b)=>a+b,0);
+            const sumActual = actualVal.reduce((a,b)=>a+b,0);
+            document.getElementById('stat-2026-target').textContent = `₩ ${fmtM(sumTarget)}`;
+            document.getElementById('stat-2026-actual').textContent = `₩ ${fmtM(sumActual)}`;
+            
+            // Share calculation
+            const asmActualSum = data26.asm.actual.reduce((a,b)=>a+b,0);
+            const totalActualSum = data26.total.actual.reduce((a,b)=>a+b,0);
+            const shareRate = ((asmActualSum / (totalActualSum || 1)) * 100).toFixed(1);
+            document.getElementById('stat-share-percent').textContent = `${shareRate}%`;
+        }
+
+        function renderUpdateForm() {
+            const container = document.getElementById('monthly-update-container');
+            container.innerHTML = '';
+            const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+            months.forEach((m, idx) => {
+                const val = Math.round(toMillion(data26.asm.actual[idx] || 0));
+                const div = document.createElement('div');
+                div.className = "flex items-center gap-3 bg-white p-2 border border-slate-200 rounded-xl hover:border-brand-500 transition-colors";
+                div.innerHTML = `<span class="w-8 text-[10px] font-bold text-slate-400 uppercase">${m}</span><input type="number" data-idx="${idx}" value="${val}" class="actual-input flex-1 bg-transparent border-none rounded-lg p-2 text-xs font-bold focus:ring-1 focus:ring-brand-500 text-slate-800">`;
+                container.appendChild(div);
+            });
+        }
+
+        function saveMonthlyData() {
+            document.querySelectorAll('.actual-input').forEach(input => {
+                data26.asm.actual[input.dataset.idx] = Number(input.value) * 1000000;
+            });
+            showToast("Performance data updated.");
+            renderSalesDashboard();
+        }
+
+        function renderChart() {
+            const ctx = document.getElementById('salesChart').getContext('2d');
+            if(chartInstance) chartInstance.destroy();
+            const labels = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+            
+            const datasets = [];
+            if(activeMode === 'ASM') {
+                datasets.push({ label: '2026 Target', data: data26.asm.target.map(toMillion), borderColor: '#0ea5e9', borderDash:[5,5], tension: 0.3 });
+                datasets.push({ label: '2026 Actual', data: data26.asm.actual.map(toMillion), type: 'bar', backgroundColor: '#0ea5e9', borderRadius: 5 });
+            } else {
+                datasets.push({ label: 'Total Actual', data: data26.total.actual.map(toMillion), type: 'bar', backgroundColor: '#cbd5e1', borderRadius: 5 });
+                datasets.push({ label: 'ASM Actual', data: data26.asm.actual.map(toMillion), type: 'bar', backgroundColor: '#0ea5e9', borderRadius: 5 });
+            }
+
+            chartInstance = new Chart(ctx, {
+                type: 'line',
+                data: { labels, datasets },
+                options: { 
+                    responsive: true, 
+                    maintainAspectRatio: false, 
+                    plugins: { legend: { position: 'top', labels: { color: '#64748b' } } },
+                    scales: {
+                        y: { grid: { color: '#e2e8f0' }, ticks: { color: '#64748b' } },
+                        x: { grid: { display: false }, ticks: { color: '#64748b' } }
+                    }
+                }
+            });
+        }
+
+        function renderTable(filter) {
+            const tbody = document.getElementById('sales-table-body');
+            tbody.innerHTML = '';
+            const filtered = data25.filter(d => d.customer === filter);
+            
+            filtered.forEach(row => {
+                const tr = document.createElement('tr');
+                tr.className = "hover:bg-slate-50 transition-colors";
+                
+                // Color badges for light mode
+                const typeClass = row.type === 'Sales' 
+                    ? 'bg-blue-50 text-blue-600 border border-blue-100' 
+                    : 'bg-emerald-50 text-emerald-600 border border-emerald-100';
+
+                let cells = `
+                    <td class="px-6 py-4 font-bold text-slate-700 text-xs">${row.sub_customer}</td>
+                    <td class="px-6 py-4">
+                        <span class="px-2 py-1 rounded text-[10px] font-bold ${typeClass}">
+                            ${row.type}
+                        </span>
+                    </td>
+                `;
+                row.monthly.forEach(m => {
+                    cells += `<td class="px-4 py-4 text-[11px] font-mono text-slate-500">${fmtM(m)}</td>`;
+                });
+                tr.innerHTML = cells;
+                tbody.appendChild(tr);
+            });
+        }
+
+        // --- Project Management Logic ---
+
+        function setStatusFilter(status) {
+            if (currentStatusFilter === status) {
+                currentStatusFilter = 'ALL';
+            } else {
+                currentStatusFilter = status;
+            }
+            renderProjectDashboard();
+        }
+
+        function updateStatusButtons() {
+            ['OPEN', 'FINISHED', 'CLOSE'].forEach(s => {
+                const btn = document.getElementById(`btn-status-${s}`);
+                if (currentStatusFilter === s) {
+                    btn.className = "flex-1 rounded-lg text-xs font-bold transition-all bg-brand-600 shadow-md text-white border border-brand-500";
+                } else {
+                    btn.className = "flex-1 rounded-lg text-xs font-bold transition-all text-slate-500 hover:text-slate-900 hover:bg-white";
+                }
+            });
+        }
+
+        function renderProjectDashboard() {
+            const deptFilter = document.getElementById('filterDept').value;
+            const catFilter = document.getElementById('filterCategory').value;
+            
+            updateStatusButtons();
+
+            const tbody = document.getElementById('project-table-body');
+            tbody.innerHTML = '';
+
+            let filtered = pData.filter(p => {
+                const pCustomer = (p.customer || '').toString().trim(); // Ensure pCustomer is defined
+                const pDept = (p.dept || '').toString().trim();
+                const pCat = (p.category || '').toString().trim();
+                const pStatus = (p.progress || '').toString().trim();
+
+                if (!pCustomer) return false; // Filter out rows without customer
+
+                const matchesDept = deptFilter === 'ALL' || pDept === deptFilter;
+                const matchesCat = catFilter === 'ALL' || pCat === catFilter;
+                const matchesStatus = currentStatusFilter === 'ALL' || pStatus === currentStatusFilter;
+                return matchesDept && matchesCat && matchesStatus;
+            });
+
+            filtered.sort((a, b) => (Number(a.priority)||999) - (Number(b.priority)||999));
+
+            const validData = pData.filter(p => (p.customer || '').toString().trim() !== ''); // Filter for stats
+
+            // Stats
+            document.getElementById('pstat-total').textContent = validData.length;
+            document.getElementById('pstat-open').textContent = validData.filter(p => (p.progress||'').trim() === 'OPEN').length;
+            document.getElementById('pstat-done').textContent = validData.filter(p => (p.progress||'').trim() !== 'OPEN').length;
+
+            filtered.forEach(p => {
+                const prog = (p.progress || '').trim();
+                const statusClass = prog === 'OPEN' ? 'status-open' : (prog === 'FINISHED' ? 'status-finished' : 'status-close');
+                
+                const row = document.createElement('tr');
+                row.className = "hover:bg-slate-50 transition-all border-b border-slate-100 last:border-0";
+                row.innerHTML = `
+                    <td class="px-6 py-4 font-bold text-slate-500">${p.priority}</td>
+                    <td class="px-6 py-4">
+                        <div class="font-bold text-slate-700">${p.customer}</div>
+                        <div class="text-slate-500 font-medium text-[10px]">${p.requestor}</div>
+                    </td>
+                    <td class="px-6 py-4 font-semibold text-slate-500 text-[11px]">${p.category}</td>
+                    <td class="px-6 py-4">
+                        <div class="font-bold text-brand-600">${p.model}</div>
+                        <div class="text-[10px] font-mono text-slate-400">${p.pn}</div>
+                    </td>
+                    <td class="px-6 py-4 font-bold text-slate-600">${p.demand}</td>
+                    <td class="px-6 py-4">
+                        <div class="text-slate-500 leading-tight text-[11px]">${p.specification}</div>
+                        <div class="text-[10px] text-slate-400 italic">${p.application}</div>
+                    </td>
+                    <td class="px-6 py-4">
+                        <div class="font-bold text-slate-600">${p.dept}</div>
+                        <div class="text-[10px] text-brand-500 font-bold">${p.nbd}</div>
+                    </td>
+                    <td class="px-6 py-4">
+                        <span class="progress-badge ${statusClass}">${prog}</span>
+                    </td>
+                `;
+                tbody.appendChild(row);
+            });
+        }
+
+        // --- Core Project Logic (Enhanced) ---
+        
+        function getTrafficLight(plan, close) {
+            // No Plan Date = Neutral/Gray
+            if (!plan) return 'light-gray';
+            
+            const planDate = new Date(plan);
+            const closeDate = close ? new Date(close) : null;
+            const today = new Date();
+
+            // 1. Closed Case
+            if (closeDate) {
+                if (closeDate <= planDate) return 'light-green'; // Closed Early/On Time
+                return 'light-red'; // Closed Late
+            }
+
+            // 2. Open Case (No Close Date)
+            if (today > planDate) return 'light-red'; // Overdue
+            
+            // Not due yet -> Gray (Neutral/Future)
+            return 'light-gray';
+        }
+
+        function renderCoreProjects() {
+            const grid = document.getElementById('core-project-grid');
+            grid.innerHTML = '';
+
+            coreData.forEach(p => {
+                // Determine Border Style (Status Based)
+                let borderClass = 'border-l-4 border-l-gray-300'; // Default
+                let statusBg = 'bg-gray-100 text-gray-600';
+
+                // Map 'Status' to Border Colors per request:
+                // Faster/On Track -> Green Border
+                // Slower/Delayed -> Orange Border
+                if (p.status === 'On Track' || p.status === 'Completed') {
+                    borderClass = 'border-fast'; // Green
+                    statusBg = 'bg-ontrack';
+                } else if (p.status === 'Delayed' || p.status === 'Critical') {
+                    borderClass = 'border-slow'; // Orange
+                    statusBg = 'bg-delayed'; // Or critical
+                }
+
+                // Traffic Lights
+                const tl_p0 = getTrafficLight(p.phase_0_plan, p.phase_0_close);
+                const tl_p1 = getTrafficLight(p.phase_1_plan, p.phase_1_close);
+                const tl_jdp = getTrafficLight(p.JDP_plan, p.JDP_close);
+
+                // Safe check for null dates
+                const p0Plan = p.phase_0_plan || '-';
+                const p0Close = p.phase_0_close || '-';
+                const p1Plan = p.phase_1_plan || '-';
+                const p1Close = p.phase_1_close || '-';
+                const jdpPlan = p.JDP_plan || '-';
+                const jdpClose = p.JDP_close || '-';
+
+                const card = document.createElement('div');
+                card.className = `white-card p-0 rounded-2xl shadow-sm hover:shadow-md transition-all flex flex-col overflow-hidden ${borderClass}`;
+                
+                card.innerHTML = `
+                    <div class="p-5 border-b border-slate-100">
+                        <div class="flex justify-between items-start mb-2">
+                            <span class="px-2 py-1 rounded text-[10px] font-bold uppercase tracking-wider ${statusBg}">${p.status}</span>
+                            <div class="flex gap-1">
+                                <span class="px-2 py-1 rounded bg-slate-100 text-slate-500 text-[10px] font-bold">${p.dept}</span>
+                                <span class="px-2 py-1 rounded bg-slate-100 text-slate-500 text-[10px] font-bold">${p.category}</span>
+                            </div>
+                        </div>
+                        <h3 class="text-lg font-bold text-slate-800 leading-tight mb-1">${p.tasks}</h3>
+                        <p class="text-sm font-semibold text-brand-600">${p.model}</p>
+                    </div>
+                    
+                    <div class="p-5 space-y-4 flex-1">
+                        <!-- Timeline Phases with Traffic Lights -->
+                        <div class="space-y-3">
+                            <!-- Phase 0 -->
+                            <div class="flex items-center text-xs">
+                                <div class="w-20 font-bold text-slate-500 flex items-center gap-2">
+                                    <span class="w-2.5 h-2.5 rounded-full ${tl_p0} inline-block"></span>
+                                    Phase 0
+                                </div>
+                                <div class="flex-1 grid grid-cols-2 gap-2">
+                                    <div class="bg-slate-50 px-2 py-1 rounded text-slate-500 border border-slate-100">
+                                        <span class="text-[9px] text-slate-400 block">Plan</span>${p0Plan}
+                                    </div>
+                                    <div class="bg-white px-2 py-1 rounded text-slate-700 border border-slate-200 ${p.phase_0_close ? 'font-bold' : 'text-slate-300'}">
+                                        <span class="text-[9px] text-slate-400 block">Close</span>${p0Close}
+                                    </div>
+                                </div>
+                            </div>
+                            <!-- Phase 1 -->
+                            <div class="flex items-center text-xs">
+                                <div class="w-20 font-bold text-slate-500 flex items-center gap-2">
+                                    <span class="w-2.5 h-2.5 rounded-full ${tl_p1} inline-block"></span>
+                                    Phase 1
+                                </div>
+                                <div class="flex-1 grid grid-cols-2 gap-2">
+                                    <div class="bg-slate-50 px-2 py-1 rounded text-slate-500 border border-slate-100">
+                                        <span class="text-[9px] text-slate-400 block">Plan</span>${p1Plan}
+                                    </div>
+                                    <div class="bg-white px-2 py-1 rounded text-slate-700 border border-slate-200 ${p.phase_1_close ? 'font-bold' : 'text-slate-300'}">
+                                        <span class="text-[9px] text-slate-400 block">Close</span>${p1Close}
+                                    </div>
+                                </div>
+                            </div>
+                            <!-- JDP -->
+                            <div class="flex items-center text-xs">
+                                <div class="w-20 font-bold text-slate-500 flex items-center gap-2">
+                                    <span class="w-2.5 h-2.5 rounded-full ${tl_jdp} inline-block"></span>
+                                    JDP
+                                </div>
+                                <div class="flex-1 grid grid-cols-2 gap-2">
+                                    <div class="bg-slate-50 px-2 py-1 rounded text-slate-500 border border-slate-100">
+                                        <span class="text-[9px] text-slate-400 block">Plan</span>${jdpPlan}
+                                    </div>
+                                    <div class="bg-white px-2 py-1 rounded text-slate-700 border border-slate-200 ${p.JDP_close ? 'font-bold' : 'text-slate-300'}">
+                                        <span class="text-[9px] text-slate-400 block">Close</span>${jdpClose}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Footer Info -->
+                    <div class="bg-slate-50 p-4 border-t border-slate-100 text-xs">
+                        <div class="flex justify-between items-center mb-2">
+                            <span class="font-bold text-slate-400 uppercase text-[10px]">Target Date</span>
+                            <span class="font-bold text-slate-800 bg-white px-2 py-1 rounded border border-slate-200 shadow-sm">${p.target}</span>
+                        </div>
+                        ${p.note ? `<div class="mt-2 text-slate-500 italic bg-white p-2 rounded border border-slate-200 text-[11px]"><span class="font-bold text-amber-500 not-italic mr-1">Note:</span>${p.note}</div>` : ''}
+                    </div>
+                `;
+                grid.appendChild(card);
+            });
+            lucide.createIcons();
+        }
+
+        function showToast(msg) {
+            const toast = document.getElementById('toast');
+            document.getElementById('toast-message').textContent = msg;
+            toast.classList.remove('translate-y-32', 'opacity-0');
+            setTimeout(() => { toast.classList.add('translate-y-32', 'opacity-0'); }, 3000);
+        }
+
+        window.addEventListener('DOMContentLoaded', init);
+    </script>
+</body>
+</html>
