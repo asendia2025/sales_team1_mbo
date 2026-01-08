@@ -20,12 +20,28 @@ window.coreProjectData = [
         "target": "2026-07-30",
         "phase_0_plan": "2026-01-10",
         "phase_0_close": "2026-01-10",
-        "phase_1_plan": "2026-02-28",
+        "phase_1_plan": "2026-03-30",
         "phase_1_close": "",
-        "JDP_plan": "2026-07-30",
+        "JDP_plan": "2026-12-30",
         "JDP_close": "",
         "status": "On Track",
-        "note": "ASM SU에서 현재의 진행상황을 공유되기를 원함(26/1/6)"
+        "note": "LDMOS 가격인상분 제품가 조정과 연계하여 진행"
+    },
+
+    {
+        "tasks": "LDMOS 인상분 제품가 조정안 반영",
+        "dept": "영업1팀",
+        "category": "RFG",
+        "model": "거래 전 제품",
+        "target": "2026-01-30",
+        "phase_0_plan": "2026-01-09",
+        "phase_0_close": "2026-01-08",
+        "phase_1_plan": "2026-01-12",
+        "phase_1_close": "",
+        "JDP_plan": "2026-01-30",
+        "JDP_close": "",
+        "status": "On Track",
+        "note": "Official Letter 작성 진행 중"
     },
 
     {
@@ -41,7 +57,7 @@ window.coreProjectData = [
         "JDP_plan": "2026-05-30",
         "JDP_close": "",
         "status": "On Track",
-        "note": "진행사항 파악 필요"
+        "note": "주간 진행사항 업데이트 필요"
     },
 
     {
@@ -57,6 +73,6 @@ window.coreProjectData = [
         "JDP_plan": "2026-05-30",
         "JDP_close": "",
         "status": "On Track",
-        "note": "진행사항 파악 필요"
+        "note": "주간 진행사항 업데이트 필요"
     }
 ];
